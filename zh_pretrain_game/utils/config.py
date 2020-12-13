@@ -26,4 +26,5 @@ class Config():
         self.pretrain_model = '/mnt/e/code/pretrain_models/bert_base_chinese'
         self.fine_tnue_model_path = '../state_dict/fine_tune_model.pt'
         self.max_sequence_length = 64
+        self.batch_size = 32
 

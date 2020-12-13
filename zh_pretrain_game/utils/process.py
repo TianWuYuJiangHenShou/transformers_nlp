@@ -12,6 +12,7 @@ import config
 from config import Config
 from transformers import BertTokenizer,BertModel,BertConfig
 import torch
+from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 
 def load_data(path,columes):
     data = pd.read_csv(path, sep='\t',names = columes)
@@ -59,13 +60,20 @@ def format_data(tokenizer,texts,config):
         masks.append(mask)
     return input_ids,masks
 
-def fune_tune(input_ids,masks,model):
+def fune_tune(input_ids,masks,model,batch_size):
 
     input_ids = torch.Tensor(input_ids).long()
     masks = torch.Tensor(masks).long()
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    input_ids ,masks, model = input_ids.to(device), masks.to(device) ,model.to(device)
-    fine_tune_model = model(input_ids ,masks, model)
+    input_ids, masks, model = input_ids.to(device), masks.to(device), model.to(device)
+
+    train_data = TensorDataset(input_ids, masks)
+    train_sampler = RandomSampler(train_data)
+    train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=batch_size)
+
+    for step, batch in enumerate(train_dataloader):
+        input_ids, masks = (i for i in batch)
+        fine_tune_model = model(input_ids ,masks)
     return fine_tune_model
 
 def save_model(model,save_path):
@@ -78,6 +86,6 @@ if __name__ == '__main__':
     model, tokenizer = load_pretrain_model(config)
     input_ids, masks = format_data(tokenizer, texts, config)
     print('>>>>>>>' * 5,'data process finished','>>>>' * 5)
-    fine_tune_model = fune_tune(input_ids, masks, model)
+    fine_tune_model = fune_tune(input_ids, masks, model,config.batch_size)
     print('>>>>>>>' * 5, 'fine-tune finished', '>>>>' * 5)
-    save_model(fine_tune_model)
+    save_model(fine_tune_model,config.fine_tnue_model_path)
