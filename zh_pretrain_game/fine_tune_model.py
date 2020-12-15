@@ -8,9 +8,9 @@
 import pandas as pd
 import numpy as np
 import codecs,os
-from zh_pretrain_game.utils.config import Config
-from zh_pretrain_game.utils.process import *
-from zh_pretrain_game.models.fine_tune import fine_tune
+from utils.config import Config
+from utils.process import *
+from models.fine_tune import fine_tune
 
 import torch
 import pickle
@@ -47,7 +47,7 @@ if __name__ == '__main__':
             input_ids = pickle.load(out_data)
         with open(config.persist['masks'], 'rb') as out_data:
             # 按保存变量的顺序加载变量
-            maks = pickle.load(out_data)
+            masks = pickle.load(out_data)
     else:
         os.makedirs(config.persist['path'])
         input_ids, masks = format_data(tokenizer, texts, config)
