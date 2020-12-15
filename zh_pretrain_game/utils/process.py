@@ -8,8 +8,6 @@
 import pandas as pd
 import numpy as np
 import codecs,os
-import config
-from config import Config
 from transformers import BertTokenizer,BertModel,BertConfig
 import torch
 import pickle
