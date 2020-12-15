@@ -28,3 +28,11 @@ class Config():
         self.max_sequence_length = 64
         self.batch_size = 32
 
+        #data Persistence
+        self.persist = {
+            'path':'../data/persistence',
+            'input_ids':'../data/persistence/input_ids.txt',
+            'masks':'../data/persistence/masks.txt'
+        }
+
+

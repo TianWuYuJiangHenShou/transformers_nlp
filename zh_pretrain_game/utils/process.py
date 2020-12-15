@@ -12,6 +12,7 @@ import config
 from config import Config
 from transformers import BertTokenizer,BertModel,BertConfig
 import torch
+import pickle
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 
 def load_data(path,columes):
@@ -84,8 +85,22 @@ if __name__ == '__main__':
     config = Config()
     texts = funetine_dataset(config)
     model, tokenizer = load_pretrain_model(config)
-    input_ids, masks = format_data(tokenizer, texts, config)
+
+    if os.path.exists(config.persist['path']):
+        with open(config.persist['input_ids'],'wb') as f:
+            input_ids = pickle.load(f)
+        with open(config.persist['masks'],'wb') as f:
+            masks = pickle.load(f)
+    else:
+        os.makedirs(config.persist['path'])
+        input_ids, masks = format_data(tokenizer, texts, config)
+        with open(config.persist['input_ids'],'wb') as f:
+            pickle.dump(input_ids,f)
+        with open(config.persist['masks'],'wb') as f:
+            pickle.dump(masks,f)
+
     print('>>>>>>>' * 5,'data process finished','>>>>' * 5)
+
     fine_tune_model = fune_tune(input_ids, masks, model,config.batch_size)
     print('>>>>>>>' * 5, 'fine-tune finished', '>>>>' * 5)
     save_model(fine_tune_model,config.fine_tnue_model_path)
