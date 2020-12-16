@@ -35,7 +35,8 @@ class Config():
         self.persist = {
             'path':'data/persistence',
             'input_ids':'data/persistence/input_ids.txt',
-            'masks':'data/persistence/masks.txt'
+            'masks':'data/persistence/masks.txt',
+            'dataset':'data/persistence/dataset.json'
         }
 
 

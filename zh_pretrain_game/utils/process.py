@@ -51,14 +51,15 @@ def load_pretrain_model(config):
 
 
 def format_data(tokenizer,texts,config):
-    input_ids,masks = [] ,[]
+    input_ids,masks,token_ids = [] ,[],[]
     # CLS,SEP = tokenizer.convert_tokens_to_ids(['[CLS]']),tokenizer.convert_tokens_to_ids(['[SEP]'])
     for line in texts:
         tokens = tokenizer.encode_plus(line.strip().replace('\n',''),max_length=config.max_sequence_length,pad_to_max_length = True)
-        input_id, token_ids, mask = tokens['input_ids'],tokens['token_type_ids'],tokens['attention_mask']
+        input_id, token_id, mask = tokens['input_ids'],tokens['token_type_ids'],tokens['attention_mask']
         input_ids.append(input_id)
+        token_ids.append(token_id)
         masks.append(mask)
-    return input_ids,masks
+    return input_ids,masks,token_ids
 
 def fune_tune(input_ids,masks,model,batch_size):
 
@@ -79,27 +80,58 @@ def fune_tune(input_ids,masks,model,batch_size):
 def save_model(model,save_path):
     torch.save(model.state_dict(), save_path, _use_new_zipfile_serialization=False)
 
+def multi_task_process(config,tokenizer):
+    # dataset = {
+    #     'OCNLI':{
+    #         'input_ids':[],
+    #         'token_ids':[],
+    #         'masks':[]
+    #     },
+    # ...
+    # }
+    dataset = {}
+    for type,path in config.dataset.items():
+        if type == 'OCNLI':
+            input_ids,masks,token_ids = [] ,[],[]
 
-# if __name__ == '__main__':
-#     config = Config()
-#     texts = funetine_dataset(config)
-#     model, tokenizer = load_pretrain_model(config)
-#
-#     if os.path.exists(config.persist['path']):
-#         with open(config.persist['input_ids'],'wb') as f:
-#             input_ids = pickle.load(f)
-#         with open(config.persist['masks'],'wb') as f:
-#             masks = pickle.load(f)
-#     else:
-#         os.makedirs(config.persist['path'])
-#         input_ids, masks = format_data(tokenizer, texts, config)
-#         with open(config.persist['input_ids'],'wb') as f:
-#             pickle.dump(input_ids,f)
-#         with open(config.persist['masks'],'wb') as f:
-#             pickle.dump(masks,f)
-#
-#     print('>>>>>>>' * 5,'data process finished','>>>>' * 5)
-#
-#     fine_tune_model = fune_tune(input_ids, masks, model,config.batch_size)
-#     print('>>>>>>>' * 5, 'fine-tune finished', '>>>>' * 5)
-#     save_model(fine_tune_model,config.fine_tnue_model_path)
+            train = load_data(config.dataset[type]['train'], columes=['id', 'sen1','sen2', 'label'])
+            sen_a = train['sen1'].values.tolist()
+            sen_b = train['sen2'].values.tolist()
+
+            for i,_ in enumerate(sen_a):
+                tokens_a = tokenizer.encode_plus(sen_a.strip().replace('\n',''))
+                tokens_b = tokenizer.encode_plus(sen_b.strip().replace('\n',''))
+                # input_id, token_id, mask = tokens_a['input_ids'],tokens_a['token_type_ids'],tokens_a['attention_mask']
+                text = tokens_a['input_ids'] + tokens_b['input_ids'][1:]
+                token_type_id = tokens_a['token_type_ids'] + tokens_b['token_type_ids'][1:]
+                mask = tokens_a['attention_mask'] + tokens_b['attention_mask'][1:]
+
+                assert len(text) == len(token_type_id)
+                assert len(text) == len(mask)
+
+                if len(text) > config.max_sequence_length:
+                    text,token_type_id,mask = text[:config.max_sequence_length],token_type_id[:config.max_sequence_length],mask[:config.max_sequence_length]
+                else:
+                    text = text + [tokenizer.pad_token_id] *(config.max_sequence_length - len(text))
+                    token_type_id = token_type_id + [0] *(config.max_sequence_length - len(token_type_id))
+                    mask = mask + [0] *(config.max_sequence_length - len(mask))
+
+                assert len(text) == config.max_sequence_length
+                assert len(token_type_id) == config.max_sequence_length
+                assert len(mask) == config.max_sequence_length
+
+                input_ids.append(text)
+                token_ids.append(token_type_id)
+                masks.append(mask)
+
+        else:
+            train = load_data(config.dataset[type]['train'], columes=['id', 'sen', 'label'])
+            lines = train['sen'].values.tolist()
+            input_ids,masks,token_ids = format_data(tokenizer,lines,config)
+        dics = {}
+        dics['input_ids'] = input_ids
+        dics['token_ids'] = token_ids
+        dics['masks'] = masks
+        dataset[type] = dics
+    return dataset
+

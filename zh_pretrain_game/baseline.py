@@ -38,10 +38,6 @@ if __name__ == '__main__':
     model, tokenizer = load_pretrain_model(config)
 
     if os.path.exists(config.persist['path']):
-        # with open(config.persist['input_ids'],'rb') as f:
-        #     input_ids = pickle.load(f)
-        # with open(config.persist['masks'],'rb') as f:
-        #     masks = pickle.load(f)
         with open(config.persist['input_ids'], 'rb') as out_data:
             # 按保存变量的顺序加载变量
             input_ids = pickle.load(out_data)
@@ -50,11 +46,14 @@ if __name__ == '__main__':
             masks = pickle.load(out_data)
     else:
         os.makedirs(config.persist['path'])
-        input_ids, masks = format_data(tokenizer, texts, config)
+        input_ids, masks,_ = format_data(tokenizer, texts, config)
+        dataset = multi_task_process(config,tokenizer)
         with open(config.persist['input_ids'],'wb') as f:
             pickle.dump(input_ids,f,pickle.HIGHEST_PROTOCOL)
         with open(config.persist['masks'],'wb') as f:
             pickle.dump(masks,f,pickle.HIGHEST_PROTOCOL)
+        with open(config.persist['masks'],'wb') as f:
+            pickle.dump(dataset,f,pickle.HIGHEST_PROTOCOL)
 
     print('>>>>>>>' * 5,'data process finished','>>>>' * 5)
     model = fine_tune(config.pretrain_model,config)

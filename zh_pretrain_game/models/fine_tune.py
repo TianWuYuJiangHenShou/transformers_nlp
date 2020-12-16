@@ -5,7 +5,6 @@
 # @File    : fine_tune.py
 # @contact: yang.a.yang@transwarp.io
 
-import torch
 from torch import nn
 from transformers import BertModel
 
@@ -15,7 +14,6 @@ class fine_tune(nn.Module):
         super(fine_tune, self).__init__()
         self.bert = BertModel.from_pretrained(path)
         self.dropout = nn.Dropout(config.fine_tnue_dropout)
-
 
     def forward(self, input_ids,masks):
         output = self.bert(input_ids,masks)
