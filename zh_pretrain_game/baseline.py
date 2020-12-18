@@ -10,13 +10,13 @@ import numpy as np
 import codecs,os
 from utils.config import Config
 from utils.process import *
-from models.fine_tune import fine_tune
 
 import torch
 import pickle
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
+from transformers import BertForSequenceClassification
 
-def fune_tune(input_ids,masks,model,batch_size):
+def fune_tune(input_ids,masks,model,batch_size,flag = None):
 
     input_ids = torch.Tensor(input_ids).long()
     masks = torch.Tensor(masks).long()
@@ -56,7 +56,7 @@ if __name__ == '__main__':
             pickle.dump(dataset,f,pickle.HIGHEST_PROTOCOL)
 
     print('>>>>>>>' * 5,'data process finished','>>>>' * 5)
-    model = fine_tune(config.pretrain_model,config)
+    model = BertForSequenceClassification.from_pretrained(config.pretrain_model)
     fine_tune_model = fune_tune(input_ids, masks, model,config.batch_size)
     print('>>>>>>>' * 5, 'fine-tune finished', '>>>>' * 5)
     save_model(fine_tune_model,config.fine_tnue_model_path)
