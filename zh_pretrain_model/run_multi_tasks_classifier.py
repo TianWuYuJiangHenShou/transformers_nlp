@@ -135,7 +135,7 @@ def _train(config,tokenizer,processors,task_name):
             dev_acc = dev_acc / dev_examples
             dev_loss = dev_loss / dev_steps
 
-            print('epoch:{},dev_acc:{},dev_loss:{}')
+            print('epoch:{},dev_acc:{},dev_loss:{}'.format(epoch,dev_acc,dev_loss))
     torch.save(model.state_dict(), './state_dict/fine_tune_models/{}.pt'.format(task_name), _use_new_zipfile_serialization=False)
 
 
