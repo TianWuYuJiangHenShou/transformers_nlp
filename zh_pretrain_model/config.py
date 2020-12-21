@@ -31,12 +31,13 @@ class Config():
         }
         # fine_tune
         self.pretrain_model = '/mnt/e/code/pretrain_models/bert_base_chinese'
-        self.pretrain_model_path = 'state_dict/corpus_pretrain'
+        self.pretrain_model_path = 'state_dcit/corpus_pretrain_gpu'
         self.fine_tnue_dropout = 0.1
         self.max_sequence_length = 128
         self.batch_size = 32
         self.learning_rate = 2e-5
         self.epochs = 10
+
 
 
 
