@@ -92,6 +92,7 @@ def _train(config,tokenizer,processors,task_name):
         model.train()
         train_loss,train_steps = 0.0,0
         for step,batch in enumerate(train_dataloader):
+            # model.train()
             batch = tuple(t.to(device) for t in batch)
             input_ids,mask,segment_id,labels = batch
             logits = model(input_ids,mask,segment_id)
@@ -109,33 +110,33 @@ def _train(config,tokenizer,processors,task_name):
             if step % 50 == 0:
                 print('epoch :{},step:{},train loss:{}'.format(epoch,step,train_loss / train_steps))
 
-            model.eval()
-            dev_loss,dev_steps = 0.0,0
-            dev_acc,dev_examples = 0.0,0
-            for batch in dev_dataloader:
-                batch = tuple(t.to(device) for t in batch)
-                eval_id,eval_mask,eval_seg,eval_label = batch
+        model.eval()
+        dev_loss,dev_steps = 0.0,0
+        dev_acc,dev_examples = 0.0,0
+        for batch in dev_dataloader:
+            batch = tuple(t.to(device) for t in batch)
+            eval_id,eval_mask,eval_seg,eval_label = batch
 
-                with torch.no_grad():
-                    eval_logits = model(eval_id,eval_mask,eval_seg)
+            with torch.no_grad():
+                eval_logits = model(eval_id,eval_mask,eval_seg)
 
-                eval_loss = loss_fct(eval_logits,eval_label)
+            eval_loss = loss_fct(eval_logits,eval_label)
 
-                eval_out = eval_logits.detach().cpu().numpy()
-                eval_label = eval_label.detach().cpu().numpy()
-                outputs = np.argmax(eval_out,axis= -1)
-                batch_acc = np.sum(outputs == eval_label)
+            eval_out = eval_logits.detach().cpu().numpy()
+            eval_label = eval_label.detach().cpu().numpy()
+            outputs = np.argmax(eval_out,axis= -1)
+            batch_acc = np.sum(outputs == eval_label)
 
-                dev_loss += eval_loss.item()
-                dev_steps += 1
+            dev_loss += eval_loss.item()
+            dev_steps += 1
 
-                dev_acc += batch_acc
-                dev_examples += eval_id.size(0)
+            dev_acc += batch_acc
+            dev_examples += eval_id.size(0)
 
-            dev_acc = dev_acc / dev_examples
-            dev_loss = dev_loss / dev_steps
+        dev_acc = dev_acc / dev_examples
+        dev_loss = dev_loss / dev_steps
 
-            print('epoch:{},dev_acc:{},dev_loss:{}'.format(epoch,dev_acc,dev_loss))
+        print('epoch:{},dev_acc:{},dev_loss:{}'.format(epoch,dev_acc,dev_loss))
     torch.save(model.state_dict(), './state_dict/fine_tune_models/{}.pt'.format(task_name), _use_new_zipfile_serialization=False)
 
 
