@@ -23,6 +23,12 @@ class Config():
                 'test': 'data/raw_data/OCEMOTION_a.csv'
             }
         }
+
+        self.label_nums = {
+            'TNEWS':15,
+            'OCEMOTION':7,
+            'OCNLI':3
+        }
         # fine_tune
         self.pretrain_model = '/mnt/e/code/pretrain_models/bert_base_chinese'
         self.pretrain_model_path = 'state_dict/corpus_pretrain'

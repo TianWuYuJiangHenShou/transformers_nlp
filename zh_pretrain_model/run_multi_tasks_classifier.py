@@ -7,6 +7,9 @@
 
 
 from fine_tune.multi_task_features import *
+from config import Config
+import torch
+from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 
 def prepare_features(task_name,processors,config,tokenizer):
     if task_name == 'OCEMOTION':
@@ -23,6 +26,43 @@ def prepare_features(task_name,processors,config,tokenizer):
     test_features = convert_examples_to_features(test, config.max_sequence_length, tokenizer)
     return train_features,dev_features,test_features
 
+def convert_feature_to_tensor(features):
+    input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
+    input_mask = torch.tensor([f.input_mask for f in features], dtype=torch.long)
+    segment_ids = torch.tensor([f.segment_ids for f in features], dtype=torch.long)
+    label_ids = torch.tensor([f.label_id for f in features], dtype=torch.long)
+    return input_ids,input_mask,segment_ids,label_ids
+
+def build_train_dataLoader(input_ids,input_mask,segment_ids,label_ids,bs):
+    data = TensorDataset(input_ids, input_mask, segment_ids,label_ids)
+    sampler = RandomSampler(data)
+    dataloader = DataLoader(data, sampler=sampler, batch_size=bs)
+    return dataloader
+
+def build_test_dataLoader(input_ids,input_mask,segment_ids,bs):
+    data = TensorDataset(input_ids, input_mask, segment_ids)
+    sampler = RandomSampler(data)
+    dataloader = DataLoader(data, sampler=sampler, batch_size=bs)
+    return dataloader
+
+def _train(config,tokenizer,processors,task_name):
+    train_feas,dev_feas,test_feas = prepare_features(task_name,processors,config,tokenizer)
+    train_ids,train_masks,train_seg_ids,train_labels= convert_feature_to_tensor(train_feas)
+    dev_ids,dev_masks,dev_seg_ids,dev_labels= convert_feature_to_tensor(dev_feas)
+    test_ids,test_masks,test_seg_ids,_= convert_feature_to_tensor(test_feas)
+
+    train_dataloader = build_train_dataLoader(train_ids,train_masks,train_seg_ids,train_labels,config.batch_size)
+    dev_dataloader = build_train_dataLoader(dev_ids,dev_masks,dev_seg_ids,dev_labels,config.batch_size)
+    test_dataloader = build_test_dataLoader(test_ids,test_masks,test_seg_ids,config.batch_size)
+
+def _evaluate():
+    pass
+
+
+def _inference():
+    pass
+
+
 def main():
 
     config = Config()
@@ -33,11 +73,6 @@ def main():
         'TNEWS':TNEWSProcess,
         'OCEMOTION':OCEMOTIONProcess
     }
-
-    #load data
-    oce_train_feas,oce_dev_feas,oce_test_feas = prepare_features('OCEMOTION',processors,config,tokenizer)
-    ocn_train_feas,ocn_dev_feas,ocn_test_feas = prepare_features('OCNLI',processors,config,tokenizer)
-    tnews_train_feas,tnews_dev_feas,tnews_test_feas = prepare_features('TNEWS',processors,config,tokenizer)
 
 
 
