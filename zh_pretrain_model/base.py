@@ -10,6 +10,7 @@ import torch
 import os
 from sklearn.model_selection import train_test_split
 import numpy as np
+import pandas as pd
 from fine_tune.modeling import BertModel,BertConfig
 
 # config = BertConfig.from_json_file('state_dict/corpus_pretrain_gpu/bert_config.json')
@@ -26,16 +27,12 @@ from fine_tune.modeling import BertModel,BertConfig
 # outputs = model(**inputs)
 # print(type(outputs))
 # model.state_dict()
-import tqdm
-for i,idx in enumerate(range(10000)):
-    print(idx)
 
-
-from tqdm import tqdm
-lt=['a','b','c']
-for i,item in enumerate(tqdm(lt)):
-    print(i, item)
-
+data = pd.read_csv('data/raw_data/TNEWS_train1128.csv',sep='\t',names=['id','text','label'])
+labels = data['label'].values.tolist()
+print(set(labels))
+print(len(set(labels)))
+print([i for i in range(100,105)])
 
 
 

@@ -12,7 +12,8 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import AdamW, get_linear_schedule_with_warmup,BertTokenizer
 from models.label_smooth import CrossEntropyLoss_LSR
-from models.old_model import SequenceClassfication
+# from models.old_model import SequenceClassfication
+from models.base_model import SequenceClassfication
 from tqdm import trange
 import tqdm,os
 import numpy as np
@@ -68,7 +69,7 @@ def _train(config,tokenizer,processors,task_name):
 
     logger.info('load data success')
 
-    model = SequenceClassfication(config,task_name)
+    model = SequenceClassfication(config,task_name,lstm_hidden_size=128)
     no_decay = ['bias', 'gamma', 'beta']
     optimizer_parameters = [
         {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
@@ -137,7 +138,7 @@ def _train(config,tokenizer,processors,task_name):
         dev_loss = dev_loss / dev_steps
 
         print('epoch:{},dev_acc:{},dev_loss:{}'.format(epoch,dev_acc,dev_loss))
-    torch.save(model.state_dict(), './state_dict/fine_tune_models/{}.pt'.format(task_name), _use_new_zipfile_serialization=False)
+    torch.save(model.state_dict(), './state_dict/fine_tune_models/{}_lstm.pt'.format(task_name), _use_new_zipfile_serialization=False)
 
 
 def main():
@@ -146,7 +147,7 @@ def main():
     tokenizer = BertTokenizer.from_pretrained(config.pretrain_model_path)
 
     processors = {
-        'OCNLI':OCNLIProcess,
+        # 'OCNLI':OCNLIProcess,
         'TNEWS':TNEWSProcess,
         'OCEMOTION':OCEMOTIONProcess
     }

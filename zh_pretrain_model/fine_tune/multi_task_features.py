@@ -116,6 +116,10 @@ class TNEWSProcess(DataProcessor):
             if set_type == 'train':
                 try:
                     label = int(line[-1])
+                    if label in range(100,105):
+                        label = label - 100
+                    elif label in range(106,117):
+                        label = label - 102
                 except:
                     pass
             else:
