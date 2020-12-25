@@ -19,7 +19,7 @@ class CrossEntropyLoss_LSR(nn.Module):
         return one_hot_label
 
     def forward(self, pre, label, size_average=True):
-        b, c = pre.size()
+        b,c = pre.size()
         one_hot_label = self._toOneHot_smooth(label, b, c).to(self.device)
         loss = torch.sum(-one_hot_label * self.logSoftmax(pre), dim=1)
         if size_average:

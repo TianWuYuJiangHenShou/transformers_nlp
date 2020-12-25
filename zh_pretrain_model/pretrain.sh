@@ -27,8 +27,7 @@
 #  --use_tpu=True
 
 
-#python ./fine_tune/convert_tf_checkpoint_to_pytorch.py \
-#  --tf_checkpoint_path ./state_dict/corpus_pretrain_gpu/model.ckpt-10000 \
-#  --bert_config_file ./state_dict/corpus_pretrain_gpu/bert_config.json \
-#  --pytorch_dump_path ./state_dict/corpus_pretrain_gpu/pytorch_model.bin
-#
+python ./fine_tune/convert_tf_checkpoint_to_pytorch.py \
+  --tf_checkpoint_path /root/workspace/transformers_nlp/zh_pretrain_game/corpus_pretrain_gpu/model.ckpt-30000 \
+  --bert_config_file ./state_dict/corpus_pretrain_gpu/bert_config.json \
+  --pytorch_dump_path ./state_dict/corpus_pretrain_gpu/pytorch_model.bin

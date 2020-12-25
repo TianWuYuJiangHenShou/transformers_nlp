@@ -70,6 +70,8 @@ def _train(config,tokenizer,processors,task_name):
     logger.info('load data success')
 
     model = SequenceClassfication(config,task_name,lstm_hidden_size=128)
+
+    model.bert.load_state_dict(torch.load(os.path.join(config.pretrain_model_path,'pytorch_model.bin'), map_location='cpu'))
     no_decay = ['bias', 'gamma', 'beta']
     optimizer_parameters = [
         {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
@@ -147,7 +149,7 @@ def main():
     tokenizer = BertTokenizer.from_pretrained(config.pretrain_model_path)
 
     processors = {
-        # 'OCNLI':OCNLIProcess,
+        'OCNLI':OCNLIProcess,
         'TNEWS':TNEWSProcess,
         'OCEMOTION':OCEMOTIONProcess
     }
