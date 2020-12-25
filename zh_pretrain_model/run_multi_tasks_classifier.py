@@ -107,8 +107,8 @@ def _train(config,tokenizer,processors,task_name):
 
             # torch.nn.utils.clip_grad_norm_(parameters=model.parameters(), max_norm=1.0)
 
-            scheduler.step()
             optimizer.step()
+            scheduler.step()
 
             if step % 50 == 0:
                 print('epoch :{},step:{},train loss:{}'.format(epoch,step,train_loss / train_steps))
@@ -149,8 +149,8 @@ def main():
     tokenizer = BertTokenizer.from_pretrained(config.pretrain_model_path)
 
     processors = {
-        'OCNLI':OCNLIProcess,
         'TNEWS':TNEWSProcess,
+        'OCNLI':OCNLIProcess,
         'OCEMOTION':OCEMOTIONProcess
     }
 
